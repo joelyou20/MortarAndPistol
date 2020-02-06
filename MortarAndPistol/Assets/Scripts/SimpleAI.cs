@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = System.Random;
 
 public class SimpleAI : EnemyAI
 {
@@ -11,19 +13,32 @@ public class SimpleAI : EnemyAI
     }
 
     public bool isStationary = false;
+    public LayerMask whatIsGround;
 
     private GameObject _player;
+    private Facing _facingComponent;
+    private int _facing = 0;
+    private float wanderVariance = 3f;
 
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
+        _facingComponent = GetComponent<Facing>();
     }
 
     void Update()
     {
+        _facing = _facingComponent.GetFacing();
         if (!isStationary)
         {
-            Move();
+            if (!IsTargetObstructed(gameObject, _player))
+            {
+                MoveTowardsPlayer();
+            }
+            else
+            {
+                Wander();
+            }
         }
     }
 
@@ -33,7 +48,7 @@ public class SimpleAI : EnemyAI
         return Mathf.Sqrt(Mathf.Pow((p2.x - p1.x), 2) + Mathf.Pow((p2.y - p1.y), 2)) * (abs ? 1 : sign);
     }
 
-    private void Move()
+    private void MoveTowardsPlayer()
     {
         // Get Player Collider radius
         var col = _player.GetComponent<Collider2D>();
@@ -44,10 +59,33 @@ public class SimpleAI : EnemyAI
         transform.Rotate(new Vector3(0, -90, 0), Space.Self);//correcting the original rotation
 
         //move towards the player
-        if (CalculateDistance(transform.position, _player.transform.position, true) > rad)
-        {//move if distance from target is greater than 1
+        if (CalculateDistance(transform.position, _player.transform.position, true) > rad &&
+            IsGroundAhead())
+        {
             transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
         }
+    }
+
+    private void Wander()
+    {
+        if(Time.deltaTime % 3 == 0)
+        {
+            if(!IsGroundAhead())
+            {
+                Flip();
+            }
+
+            var rand = new Random();
+            var value = rand.Next(0, 1);
+            if(value == 0) { Flip(); }
+
+            transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+        }
+    }
+
+    private void Flip()
+    {
+        _facingComponent.SetFacing(Math.Abs(_facing - 1));
     }
 
     private Vector3 GetDirectionVector(GameObject origin, GameObject target)
@@ -57,13 +95,22 @@ public class SimpleAI : EnemyAI
         return toPosition - fromPosition;
     }
 
-    public static bool IsTargetObstructed(GameObject origin, GameObject target)
+    public bool IsTargetObstructed(GameObject origin, GameObject target)
     {
-        var hit = Physics2D.Linecast(origin.transform.position, target.transform.position);
+        Physics2D.queriesStartInColliders = false;
+        var hit = Physics2D.Raycast(origin.transform.position, target.transform.position);
+        if(hit.collider.gameObject.tag.Equals("Player"))
+        {
+            Debug.DrawLine(origin.transform.position, target.transform.position, Color.green);
+        }
+        else
+        {
+            Debug.DrawLine(origin.transform.position, target.transform.position, Color.red);
+        }
         return hit.collider.gameObject.name == target.name;
     }
 
-    public static void DrawLine(GameObject origin, GameObject target)
+    public void DrawLine(GameObject origin, GameObject target)
     {
         if(IsTargetObstructed(origin, target))
         {
@@ -73,5 +120,26 @@ public class SimpleAI : EnemyAI
         {
             Debug.DrawLine(origin.transform.position, target.transform.position, Color.green);
         }
+    }
+
+    private bool IsGroundAhead()
+    {
+        if (!_facingComponent)
+        {
+            Debug.LogError("Object has no facing component.");
+        }
+        var pos = transform.position;
+        var offset = _facing == 0 ? -1 : 1;
+        var pointAhead = new Vector2(pos.x - offset * 2, 0);
+        var downVector = new Vector2(pos.x - offset * 2, -1 * 20);
+        var hit = Physics2D.Linecast(pointAhead, downVector);
+        //Debug.DrawLine(pointAhead, downVector);
+        if(!hit || hit.distance > 5)
+        {
+            return false;
+        }
+
+        return true;
+
     }
 }

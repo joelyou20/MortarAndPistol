@@ -81,6 +81,7 @@ public class Jump : MonoBehaviour
 
         if (jumpType == JumpType.Hold)
         {
+            Debug.Log(GroundChecker.Check(groundCheck, whatIsGround));
             if (GroundChecker.Check(groundCheck, whatIsGround) && Input.GetKeyDown(KeyCode.Space))
             {
                 _jump = true;

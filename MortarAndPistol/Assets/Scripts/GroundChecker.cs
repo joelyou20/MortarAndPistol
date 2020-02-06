@@ -11,6 +11,8 @@ public class GroundChecker
         pos = new Vector3(pos.x, pos.y - 0.1f, pos.z);
 
         RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, dist, whatIsGround);
+        Debug.Log(hit.collider);
+        Debug.DrawRay(pos, Vector2.down);
         if (hit.collider)
         {
             return true;

@@ -28,6 +28,10 @@ public class Facing : MonoBehaviour
         UpdateFacing();
     }
 
+    public int GetFacing() => _facing;
+
+    public void SetFacing(int facing) => _facing = facing;
+
     private void UpdateFacing()
     {
         switch (facingType)

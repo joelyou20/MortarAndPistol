@@ -17,10 +17,6 @@ public class Bee : MonoBehaviour
             _hash = gameObject.GetHashCode();
             List<GameObject> activeSpawnerList = GetActiveSpawners();
 
-            Debug.Log(activeSpawnerList
-                .Select(x => x.GetComponent<Spawner>().GetSpawned()
-                .Where(y => y.GetHashCode() == _hash)).ToList().Count);
-
             List<Spawner> prunedSpawnerList = activeSpawnerList
                 .Select(x => (Spawner)x.GetComponent<Spawner>().GetSpawned()
                 .Where(y => y.GetHashCode() == _hash)).ToList();

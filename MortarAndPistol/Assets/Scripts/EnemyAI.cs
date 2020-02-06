@@ -18,8 +18,6 @@ public class EnemyAI : MonoBehaviour, IEnemyAI
     {
         health -= damage;
 
-        Debug.Log(__health__);
-
         if(health <= 0)
         {
             Die();
