@@ -15,11 +15,12 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        EnemyAI enemy = col.GetComponent<EnemyAI>();
+        Enemy enemy = col.GetComponent<Enemy>();
         if(enemy != null)
         {
             enemy.TakeDamage(damage);
         }
+
 
         if (col.tag != "Player")
         {

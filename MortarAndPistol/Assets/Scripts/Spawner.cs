@@ -10,14 +10,14 @@ public class Spawner : MonoBehaviour
     public int maxEnemies = 3;
 
     private float _timer;
-    private List<EnemyAI> _spawnedEnemies;
+    private List<Enemy> _spawnedEnemies;
     private int _id;
 
     // Start is called before the first frame update
     void Start()
     {
         _id = gameObject.GetHashCode();
-        _spawnedEnemies = new List<EnemyAI>();
+        _spawnedEnemies = new List<Enemy>();
     }
 
     // Update is called once per frame
@@ -29,14 +29,14 @@ public class Spawner : MonoBehaviour
             if(_spawnedEnemies.Count < maxEnemies)
             {
                 _spawnedEnemies.Add(Instantiate(enemyTypes[0], spawnPoint.position, spawnPoint.rotation)
-                    .GetComponent<EnemyAI>());
+                    .GetComponent<Enemy>());
                 _timer = 0f;
             }
         }
         pollSpawnedEnemies();
     }
 
-    public List<EnemyAI> GetSpawned() { return _spawnedEnemies; }
+    public List<Enemy> GetSpawned() { return _spawnedEnemies; }
 
     private void pollSpawnedEnemies()
     {

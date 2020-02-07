@@ -49,6 +49,14 @@ public class Jump : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    }
+
+    void FixedUpdate()
+    {
+        if (_jump)
+        {
+            ExecuteJump();
+        }
         if (jumpType == JumpType.Charge)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -58,7 +66,7 @@ public class Jump : MonoBehaviour
 
             if (Input.GetKeyUp(KeyCode.Space))
             {
-                if (GroundChecker.Check(groundCheck, whatIsGround))
+                if (GroundChecker.Check(groundCheck))
                 {
                     _jumpTimer.Stop();
                     _jump = true;
@@ -81,8 +89,7 @@ public class Jump : MonoBehaviour
 
         if (jumpType == JumpType.Hold)
         {
-            Debug.Log(GroundChecker.Check(groundCheck, whatIsGround));
-            if (GroundChecker.Check(groundCheck, whatIsGround) && Input.GetKeyDown(KeyCode.Space))
+            if (GroundChecker.Check(groundCheck) && Input.GetKeyDown(KeyCode.Space))
             {
                 _jump = true;
                 jumpTimeCounter = jumpTime;
@@ -97,15 +104,6 @@ public class Jump : MonoBehaviour
         if (fastFalling && (_rb.velocity.y < 0))
         {
             _rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultipler - 1) * Time.deltaTime;
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (_jump)
-        {
-            Debug.Log(_jump);
-            ExecuteJump();
         }
     }
 

@@ -4,29 +4,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
 
-public class SimpleAI : EnemyAI
+public class SimpleAI : MonoBehaviour
 {
+    public bool isStationary = false;
+    public LayerMask whatIsGround;
+
     private enum State
     {
         Idle,
         Aggressive
     }
 
-    public bool isStationary = false;
-    public LayerMask whatIsGround;
-
     private GameObject _player;
-    private Facing _facingComponent;
     private int _facing = 0;
     private float wanderVariance = 3f;
+    private Facing _facingComponent;
+    private float _speed;
 
-    void Start()
+    public void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
         _facingComponent = GetComponent<Facing>();
+        _speed = GetComponent<Enemy>().speed;
     }
 
-    void Update()
+    public void Update()
     {
         _facing = _facingComponent.GetFacing();
         if (!isStationary)
@@ -62,7 +64,7 @@ public class SimpleAI : EnemyAI
         if (CalculateDistance(transform.position, _player.transform.position, true) > rad &&
             IsGroundAhead())
         {
-            transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+            transform.Translate(new Vector3(_speed * Time.deltaTime, 0, 0));
         }
     }
 
@@ -79,7 +81,7 @@ public class SimpleAI : EnemyAI
             var value = rand.Next(0, 1);
             if(value == 0) { Flip(); }
 
-            transform.Translate(new Vector3(speed * Time.deltaTime, 0, 0));
+            transform.Translate(new Vector3(_speed * Time.deltaTime, 0, 0));
         }
     }
 
@@ -99,7 +101,7 @@ public class SimpleAI : EnemyAI
     {
         Physics2D.queriesStartInColliders = false;
         var hit = Physics2D.Raycast(origin.transform.position, target.transform.position);
-        if(hit.collider.gameObject.tag.Equals("Player"))
+        if(hit && hit.collider && hit.collider.gameObject.tag.Equals("Player"))
         {
             Debug.DrawLine(origin.transform.position, target.transform.position, Color.green);
         }
@@ -107,6 +109,12 @@ public class SimpleAI : EnemyAI
         {
             Debug.DrawLine(origin.transform.position, target.transform.position, Color.red);
         }
+
+        if (!hit || !hit.collider)
+        {
+            return false;
+        }
+
         return hit.collider.gameObject.name == target.name;
     }
 
@@ -134,7 +142,9 @@ public class SimpleAI : EnemyAI
         var downVector = new Vector2(pos.x - offset * 2, -1 * 20);
         var hit = Physics2D.Linecast(pointAhead, downVector);
         //Debug.DrawLine(pointAhead, downVector);
-        if(!hit || hit.distance > 5)
+        if (!hit || 
+            hit.distance > 5 ||
+            !GroundChecker.CompareLayerToLayerMask(hit.collider.gameObject.layer))
         {
             return false;
         }
