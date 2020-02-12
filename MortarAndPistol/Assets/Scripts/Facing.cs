@@ -14,6 +14,7 @@ public class Facing : MonoBehaviour
     private int _facing;
     private Rigidbody2D _rb;
     private GameObject _player;
+    private Vector3 _tempPos;
 
     // Start is called before the first frame update
     void Start()
@@ -85,6 +86,7 @@ public class Facing : MonoBehaviour
 
     private int Trans_Move_Facing()
     {
+        // This is a problem. Don't want the enemies always looking at the player.
         var dist = CalculateDistance(transform.position, _player.transform.position);
         if(dist >= 0.01f)
         {

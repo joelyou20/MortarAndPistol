@@ -49,14 +49,6 @@ public class Jump : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    }
-
-    void FixedUpdate()
-    {
-        if (_jump)
-        {
-            ExecuteJump();
-        }
         if (jumpType == JumpType.Charge)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -94,11 +86,20 @@ public class Jump : MonoBehaviour
                 _jump = true;
                 jumpTimeCounter = jumpTime;
             }
+        }
 
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                _jump = false;
-            }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            jumpTimeCounter = 0;
+            _jump = false;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (_jump)
+        {
+            ExecuteJump();
         }
 
         if (fastFalling && (_rb.velocity.y < 0))
@@ -131,15 +132,31 @@ public class Jump : MonoBehaviour
         _rb.velocity = new Vector2(_rb.velocity.x, jumpForce * 2);
     }
 
+    private void Charge_Jump()
+    {
+        _jump = false;
+        _rb.velocity = new Vector2(_rb.velocity.x, jumpForce + _jumpVelocity);
+        _jumpVelocity = 0;
+    }
+
     private void Hold_Jump()
     {
+        // To make sure you can't get stuck jumping indefinitely
+        if (jumpTimeCounter <= 0)
+        {
+            _jump = false;
+        }
+        else
+        {
+            jumpTimeCounter -= Time.deltaTime;
+        }
+
         _rb.velocity = new Vector2(_rb.velocity.x, jumpForce);
-        if (Input.GetKey(KeyCode.Space) && _jump)
+        if (_jump)
         {
             if (jumpTimeCounter > 0)
             {
                 _rb.velocity = new Vector2(_rb.velocity.x, jumpForce);
-                jumpTimeCounter -= Time.deltaTime;
             }
             else
             {
@@ -165,12 +182,5 @@ public class Jump : MonoBehaviour
         }
 
         return false;
-    }
-
-    private void Charge_Jump()
-    {
-        _jump = false;
-        _rb.velocity = new Vector2(_rb.velocity.x, jumpForce + _jumpVelocity);
-        _jumpVelocity = 0;
     }
 }

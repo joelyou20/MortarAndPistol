@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour, IEnemy
+public class Enemy : MonoBehaviour, IEnemy
 {
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ //
@@ -10,14 +13,23 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     [SerializeField] public float speed = 5f;
     [SerializeField] public int health = 10;
     [SerializeField] public int baseDmg = 1;
+    [SerializeField] public float attackRange = 1;
+    [Range(0, 100)] [SerializeField] public int attackSpeed = 2;
+    [SerializeField] public List<GameObject> drops;
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ //
     // -------------------------------------- //
     // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv //
 
-    void Start()
-    {
+    private List<Collider2D> _colList;
 
+    public bool IsPlayerWithinRange()
+    {
+        var contactFilter = new ContactFilter2D();
+        contactFilter.SetLayerMask(LayerMask.NameToLayer("Player"));
+        _colList = Physics2D.OverlapCircleAll(transform.position, attackRange, LayerMask.GetMask("Player")).ToList();
+
+        return _colList.Count > 0;
     }
 
     public void TakeDamage(int damage)
@@ -30,25 +42,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         }
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    public void Attack()
     {
-        Attack(col);
-    }
-
-    public void Attack(Collision2D col)
-    {
-        Player player = col.gameObject.GetComponent<Player>();
-        Debug.Log(col.gameObject.name);
-        if (player)
+        foreach (var col in _colList)
         {
-            Debug.Log(col.gameObject.name);
-            var player_rb = col.gameObject.GetComponent<Rigidbody2D>();
+            var player = col.gameObject.GetComponent<Player>();
+            var player_rb = player.gameObject.GetComponent<Rigidbody2D>();
             player.TakeDamage(baseDmg);
             KnockBack(player_rb);
         }
-
-        // Hits something that is not a player
-        // TODO...
     }
 
     private void KnockBack(Rigidbody2D prb)
@@ -59,6 +61,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public void Die()
     {
+        Instantiate(drops[0]);
         // Instantiate(deathEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }

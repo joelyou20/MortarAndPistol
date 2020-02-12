@@ -20,6 +20,12 @@ public class Player : MonoBehaviour, IPlayer
     public float jumpHeight;
     public int armour;
 
+    public Transform bodySprite;
+    public Transform headSprite;
+
+    private SpriteRenderer _headSpriteRenderer;
+    private SpriteRenderer _bodySpriteRenderer;
+
     void Start()
     {
         /*
@@ -30,6 +36,9 @@ public class Player : MonoBehaviour, IPlayer
         __jumpHeight__ = jumpHeight;
         __armour__ = armour;
         */
+
+        _headSpriteRenderer = bodySprite.GetComponent<SpriteRenderer>();
+        _bodySpriteRenderer = headSprite.GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -48,7 +57,20 @@ public class Player : MonoBehaviour, IPlayer
     public void TakeDamage(int damage)
     {
         health -= damage;
-        CheckHp();
+        CheckHp(); 
+        StartCoroutine("Flasher");
+    }
+
+    IEnumerator Flasher()
+    {
+        var bodyNormalColor = _bodySpriteRenderer.color;
+        var headNormalColor = _headSpriteRenderer.color;
+        _headSpriteRenderer.material.color = Color.red;
+        _bodySpriteRenderer.material.color = Color.red;
+        yield return new WaitForSeconds(.1f);
+        _headSpriteRenderer.material.color = headNormalColor;
+        _bodySpriteRenderer.material.color = bodyNormalColor;
+        yield return new WaitForSeconds(.1f);
     }
 
     public void Die()

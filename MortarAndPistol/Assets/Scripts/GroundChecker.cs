@@ -40,19 +40,22 @@ public class GroundChecker
         var water_Layer = 4;
         var ui_Layer = 5;
         var ground_Layer = 9;
+        var enemy_Layer = 10;
 
         var default_LayerMask = 1 << default_Layer;
         var transparentFX_LayerMask = 1 << transparentFX_Layer;
         var water_LayerMask = 1 << water_Layer;
         var ui_LayerMask = 1 << ui_Layer;
         var ground_LayerMask = 1 << ground_Layer;
+        var enemy_LayerMask = 1 << enemy_Layer;
 
         return
             default_LayerMask |
             transparentFX_LayerMask |
             water_LayerMask |
             ui_LayerMask |
-            ground_LayerMask;
+            ground_LayerMask |
+            enemy_LayerMask;
     }
 
     public static bool CompareLayerToLayerMask(int layer)
